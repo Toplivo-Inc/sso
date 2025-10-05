@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body {
+        display: flex;
+        justify-content: space-around;
+		background: #141714;
+		color: #dddddd;
+      }
+      h1 {
+        text-align: center;
+      }
+      div.input-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      div.input {
+        display: flex;
+        justify-content: space-between;
+        align-content: baseline;
+        gap: 20px;
+      }
+      div.center {
+        display: flex;
+        justify-content: center;
+      }
+      button#login_btn {
+        width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h1>Sign up</h1>
+      <div class="input-panel">
+        <div class="input">
+          <label for="username">Username:</label><br />
+          <input type="text" id="username" name="username" />
+        </div>
+        <div class="input">
+          <label for="email">Email:</label><br />
+          <input type="text" id="email" name="email" />
+        </div>
+        <div class="input">
+          <label for="password">Password:</label>
+          <input type="text" id="password" name="password" />
+        </div>
+        <div class="center">
+          <button id="login_btn">Login</button>
+        </div>
+      </div>
+      <div class="center">
+        <p>Already have an account? <a href="/login">Sign in</a></p>
+      </div>
+    </div>
+  </body>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectTo = urlParams.get("redirect_to");
+	console.log(redirectTo);
+
+    // FIXME: cors
+    document.getElementById("login_btn").addEventListener("click", sendForm);
+    async function sendForm() {
+      let usernameInput = document.getElementById("username").value;
+      let emailInput = document.getElementById("email").value;
+      let passwordInput = document.getElementById("password").value;
+      const url = `http://localhost:9100/api/v1/register`;
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          body: JSON.stringify({ username: usernameInput, email: emailInput, password: passwordInput }),
+        });
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+
+		if (redirectTo != null) {
+		  window.location.replace(redirectTo);
+		} else {
+		  // FIXME: redirect to email verification
+		  window.location.replace("http://localhost:9100");
+		}
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+  </script>
+</html>

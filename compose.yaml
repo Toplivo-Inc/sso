@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres
+    container_name: sso-db
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS} 
+      POSTGRES_DB: sso
+    volumes:
+      - sso-postgres-data:/var/lib/postgresql/data
+      - migrations:/migrations
+    networks:
+      - toplivo
+  sso:
+    container_name: toplivo-sso
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "9100:8080"
+    networks:
+      - toplivo
+
+networks:
+  toplivo:
+    name: toplivo
+
+volumes:
+  sso-postgres-data:
+  migrations:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./migrations

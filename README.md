@@ -1,8 +1,13 @@
 # ToplivoSSO
 
-ToplivoSSO is a minimal SSO service for Toplivo apps.
+> [!WARNING]
+> Not fully implemented yet.
 
-It includes:
-- Creating new accounts
-- Granting access via JWT tokens
-- OAuth with Github and Telegram
+ToplivoSSO is a minimal SSO service for Toplivo apps that supports OpenID Connect protocol with authorization code flow.
+
+It allows user to register accounts with email.
+
+Roadmap:
+- [ ] Full OpenID Connect protocol implementation
+- [ ] Pretty sign up and sign in forms
+- [ ] Management console
