@@ -28,6 +28,7 @@ services:
 networks:
   toplivo:
     name: toplivo
+    driver: bridge
 
 volumes:
   sso-postgres-data:
