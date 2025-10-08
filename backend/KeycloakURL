@@ -1,0 +1,10 @@
+http://localhost:8080/realms/master/protocol/openid-connect/auth?
+	client_id=security-admin-console
+	&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fadmin%2Fmaster%2Fconsole%2F
+	&state=97a5467c-b049-4eb1-8243-97946cd6af82
+	&response_mode=query
+	&response_type=code
+	&scope=openid
+	&nonce=2e040d44-0c91-4622-bddc-8df1eb0cdd1a
+	&code_challenge=G65bq9IpMHFN-fsDK_ksH8xsBGyh7Tk1aK04ZaHqVXQ
+	&code_challenge_method=S256

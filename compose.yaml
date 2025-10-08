@@ -14,14 +14,26 @@ services:
       - migrations:/migrations
     networks:
       - toplivo
-  sso:
-    container_name: toplivo-sso
+  backend:
+    container_name: tsso-back
     build:
-      context: .
+      context: backend
       dockerfile: Dockerfile
+    env_file:
+      - ./.env
     restart: always
     ports:
       - "9100:8080"
+    networks:
+      - toplivo
+  frontend:
+    container_name: tsso-front
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "9101:80"
     networks:
       - toplivo
 

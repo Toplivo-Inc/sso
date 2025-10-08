@@ -1,21 +1,24 @@
 include .env
 export $(shell sed 's/=.*//' .env)
 
+BACKEND := backend
+
 .PHONY: docs run build migration psql stop
 
 run:
-	@docker compose up --attach sso
+	@docker compose up --attach backend
 
 build: docs
-	@go run ./cmd/test-service/main.go &
-	@docker compose up --build --attach sso
+	@cd $(BACKEND) && go run ./cmd/test-service/main.go &
+	@docker compose up --build --attach backend
 
 stop:
-	@fuser -k 9102/tcp
 	@docker stop toplivo-sso
+	@docker stop toplivo-frontend
+	@fuser -k 9102/tcp
 
 docs:
-	@swag init -g ./cmd/sso/main.go -o ./docs
+	@cd $(BACKEND) && swag init -g ./cmd/sso/main.go -o ./docs
 
 migration:
 	@docker exec -it sso-db psql -U ${POSTGRES_USER} -d sso -f $(m)
@@ -24,4 +27,4 @@ psql:
 	@docker exec -it sso-db psql -U ${POSTGRES_USER} -d sso
 
 test:
-	@go test -v ./...
+	@cd $(BACKEND) && go test -v ./...
