@@ -6,12 +6,12 @@ type AuthService interface {
 	Register(form *models.UserRegisterForm) error
 	Login(form *models.UserLoginForm, metadata *models.LoginMetadata) (string, error)
 	FindUserByID(id string) (*models.User, error)
-	FindUserPermissions(userID, clientID string) []models.Permission
+	FindUserPermissions(userID, clientID string) []models.Scope
 }
 
 type ClientService interface {
 	FindClientByID(id string) (*models.Client, error)
-	Permissions(clientID string, userID string) []models.Permission
+	Permissions(clientID string, userID string) []models.Scope
 }
 
 type OAuthService interface {

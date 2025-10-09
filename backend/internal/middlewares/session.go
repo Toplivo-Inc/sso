@@ -12,7 +12,7 @@ func SessionMiddleware(sessionService service.SessionService, config *config.Con
     return func(c *gin.Context) {
         sessionToken, err := c.Cookie("TOPLIVO_SESSION_TOKEN")
         if err != nil {
-            // No session cookie, user is not authenticate
+            // No session cookie, user is not authenticated
             c.Next()
             return
         }

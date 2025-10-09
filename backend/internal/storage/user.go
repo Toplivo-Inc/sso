@@ -22,24 +22,24 @@ func (r userRepo) CreateUser(user *models.User) error {
 	return result.Error
 }
 
-// GetUserByID selects a user with provided uuid
-func (r userRepo) GetUserByID(id string) (*models.User, error) {
+// UserByID selects a user with provided uuid
+func (r userRepo) UserByID(id string) (*models.User, error) {
 	var user models.User
 	result := r.db.Where("id = ?", id).First(&user)
 
 	return &user, result.Error
 }
 
-// GetUserByEmail selects a user with provided uuid
-func (r userRepo) GetUserByEmail(email string) (*models.User, error) {
+// UserByEmail selects a user with provided uuid
+func (r userRepo) UserByEmail(email string) (*models.User, error) {
 	var user models.User
 	result := r.db.Where("email = ?", email).First(&user)
 
 	return &user, result.Error
 }
 
-// GetUserByName selects a user with provided uuid
-func (r userRepo) GetUserByName(username string) (*models.User, error) {
+// UserByName selects a user with provided uuid
+func (r userRepo) UserByName(username string) (*models.User, error) {
 	var user models.User
 	result := r.db.Where("username = ?", username).First(&user)
 
@@ -70,8 +70,8 @@ func (r userRepo) RestoreUser(id string) error {
 }
 
 // FindByName selects a user with provided uuid
-func (r userRepo) GetPermissions(userID, clientID string) []models.Permission {
-	perms := make([]models.Permission, 0)
+func (r userRepo) GetPermissions(userID, clientID string) []models.Scope {
+	perms := make([]models.Scope, 0)
 
 	r.db.Raw(`
 	SELECT (p.*) FROM users AS u
@@ -88,8 +88,8 @@ func (r userRepo) CreateSession(session *models.Session) error {
 	return result.Error
 }
 
-// GetSessionByID selects a session with provided uuid
-func (r userRepo) GetSessionByID(id string) (*models.Session, error) {
+// SessionByID selects a session with provided uuid
+func (r userRepo) SessionByID(id string) (*models.Session, error) {
 	var session models.Session
 	result := r.db.Where("id = ?", id).First(&session)
 
@@ -97,15 +97,15 @@ func (r userRepo) GetSessionByID(id string) (*models.Session, error) {
 }
 
 // FindByID selects a session with provided refresh token
-func (r userRepo) GetSessionByToken(sessionToken string) (*models.Session, error) {
+func (r userRepo) SessionByToken(sessionToken string) (*models.Session, error) {
 	var session models.Session
 	result := r.db.Where("session_token = ?", sessionToken).First(&session)
 
 	return &session, result.Error
 }
 
-// GetSessionByMetadata selects a session with provided userAgent and IP
-func (r *userRepo) GetSessionByMetadata(userAgent string, userIP string) (*models.Session, error) {
+// SessionByMetadata selects a session with provided userAgent and IP
+func (r *userRepo) SessionByMetadata(userAgent string, userIP string) (*models.Session, error) {
 	var session models.Session
 	result := r.db.Where("user_agent = ?", userAgent).Where("user_ip = ?", userIP).First(&session)
 

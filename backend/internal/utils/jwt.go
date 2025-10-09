@@ -17,7 +17,7 @@ func NewAccessToken(client *models.Client, user *models.User) (string, error) {
 	claims["aud"] = client.ID.String()
 	claims["sub"] = user.ID.String()
 	scopes := make([]string, 0)
-	for _, perm := range user.Permissions {
+	for _, perm := range user.Scopes {
 		scopes = append(scopes, perm.ScopeString())
 	}
 	claims["scopes"] = scopes

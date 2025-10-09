@@ -136,7 +136,7 @@ func (o *oauth) Token(c *gin.Context) {
 
 	client, _ := o.clientService.FindClientByID(req.ClientID.String())
 	user, _ := o.userService.FindUserByID(req.UserID.String())
-	user.Permissions = o.userService.FindUserPermissions(user.ID.String(), client.ID.String())
+	user.Scopes = o.userService.FindUserPermissions(user.ID.String(), client.ID.String())
 
 	token, err := utils.NewAccessToken(client, user)
 	if err != nil {

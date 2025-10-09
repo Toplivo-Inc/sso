@@ -15,7 +15,7 @@ func NewSessionService(ur storage.UserRepository) SessionService {
 
 // ValidateSession implements SessionService.
 func (s *sessionService) ValidateSession(sessionToken string) (*models.Session, error) {
-	return s.userRepo.GetSessionByToken(sessionToken)
+	return s.userRepo.SessionByToken(sessionToken)
 }
 
 // GenerateAccessToken implements SessionService.

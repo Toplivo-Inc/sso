@@ -8,20 +8,20 @@ import (
 	"sso/pkg/errors"
 )
 
-type userService struct {
+type authService struct {
 	userRepo   storage.UserRepository
 	clientRepo storage.ClientRepository
 }
 
-func NewUseService(userRepo storage.UserRepository, clientRepo storage.ClientRepository) AuthService {
-	return &userService{
+func NewAuthService(userRepo storage.UserRepository, clientRepo storage.ClientRepository) AuthService {
+	return &authService{
 		userRepo,
 		clientRepo,
 	}
 }
 
 // Register implements UserService.
-func (s *userService) Register(form *models.UserRegisterForm) error {
+func (s *authService) Register(form *models.UserRegisterForm) error {
 	user := models.User{}
 	user.Username = form.Username
 	// NOTE: shouldn't return err
@@ -39,11 +39,11 @@ func (s *userService) Register(form *models.UserRegisterForm) error {
 // Login implements UserService.
 // Searches for user with provided login as either email or username and checks if password is valid.
 // Returns session token if everything is good.
-func (s *userService) Login(form *models.UserLoginForm, metadata *models.LoginMetadata) (string, error) {
+func (s *authService) Login(form *models.UserLoginForm, metadata *models.LoginMetadata) (string, error) {
 	found := false
 
 	// TODO: create a new session with token based on metadata
-	user, err := s.userRepo.GetUserByEmail(form.Login)
+	user, err := s.userRepo.UserByEmail(form.Login)
 	if err == nil {
 		if !utils.CheckPasswordHash(form.Password, user.PasswordHash.String) {
 			return "", errors.AppErr(401, "incorrect password")
@@ -52,7 +52,7 @@ func (s *userService) Login(form *models.UserLoginForm, metadata *models.LoginMe
 	}
 
 	if !found {
-		user, err = s.userRepo.GetUserByName(form.Login)
+		user, err = s.userRepo.UserByName(form.Login)
 		if err == nil {
 			if !utils.CheckPasswordHash(form.Password, user.PasswordHash.String) {
 				return "", errors.AppErr(401, "incorrect password")
@@ -76,17 +76,17 @@ func (s *userService) Login(form *models.UserLoginForm, metadata *models.LoginMe
 	if err != nil {
 		return "", err
 	}
-	session, err := s.userRepo.GetSessionByID(createSession.ID.String())
+	session, err := s.userRepo.SessionByID(createSession.ID.String())
 	if err != nil {
 		return "", err
 	}
 	return session.SessionToken, nil
 }
 
-func (s *userService) FindUserByID(id string) (*models.User, error) {
-	return s.userRepo.GetUserByID(id)
+func (s *authService) FindUserByID(id string) (*models.User, error) {
+	return s.userRepo.UserByID(id)
 }
 
-func (s *userService) FindUserPermissions(userID, clientID string) []models.Permission {
+func (s *authService) FindUserPermissions(userID, clientID string) []models.Scope {
 	return s.userRepo.GetPermissions(userID, clientID)
 }

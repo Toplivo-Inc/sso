@@ -42,16 +42,16 @@ func (r authRepo) CreateFromInput(input *models.AuthorizeInput) (*models.AuthReq
 	return &req, result.Error
 }
 
-// GetByID selects an auth with provided uuid
-func (r authRepo) GetByID(id string) (*models.AuthRequest, error) {
+// AuthReqByID selects an auth with provided uuid
+func (r authRepo) AuthReqByID(id string) (*models.AuthRequest, error) {
 	var auth models.AuthRequest
 	result := r.db.Where("id = ?", id).First(&auth)
 
 	return &auth, result.Error
 }
 
-// GetByCode selects an auth with provided code
-func (r authRepo) GetByCode(code string) (*models.AuthRequest, error) {
+// AuthReqByCode selects an auth with provided code
+func (r authRepo) AuthReqByCode(code string) (*models.AuthRequest, error) {
 	var auth models.AuthRequest
 	result := r.db.Where("code = ?", code).First(&auth)
 

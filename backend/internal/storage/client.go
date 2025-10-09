@@ -22,8 +22,8 @@ func (r clientRepo) Create(client *models.Client) error {
 	return result.Error
 }
 
-// GetByID selects an client with provided uuid
-func (r clientRepo) GetByID(id string) (*models.Client, error) {
+// ClientByID selects an client with provided uuid
+func (r clientRepo) ClientByID(id string) (*models.Client, error) {
 	var client models.Client
 	result := r.db.Where("id = ?", id).First(&client)
 
@@ -31,7 +31,7 @@ func (r clientRepo) GetByID(id string) (*models.Client, error) {
 }
 
 // FindByID selects an client with provided name
-func (r clientRepo) GetByName(name string) (*models.Client, error) {
+func (r clientRepo) ClientByName(name string) (*models.Client, error) {
 	var client models.Client
 	result := r.db.Where("name = ?", name).First(&client)
 

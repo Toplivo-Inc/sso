@@ -15,10 +15,10 @@ func NewClientService(clientRepo storage.ClientRepository) ClientService {
 }
 
 func (c *clientService) FindClientByID(id string) (*models.Client, error) {
-	return c.clientRepo.GetByID(id)
+	return c.clientRepo.ClientByID(id)
 }
 
-func (c *clientService) Permissions(clientID string, userID string) []models.Permission {
-	permissions := make([]models.Permission, 0)
+func (c *clientService) Permissions(clientID string, userID string) []models.Scope {
+	permissions := make([]models.Scope, 0)
 	return permissions
 }

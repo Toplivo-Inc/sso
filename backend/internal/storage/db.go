@@ -44,7 +44,7 @@ func MustLoad(cfg *config.Config) *gorm.DB {
 	db.AutoMigrate(&models.User{},
 		&models.Session{},
 		&models.Client{},
-		&models.Permission{},
+		&models.Scope{},
 		&models.AuthRequest{},
 	)
 

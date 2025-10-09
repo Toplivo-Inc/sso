@@ -40,7 +40,7 @@ func (o oauthService) ValidateAuthorizeInput(req models.AuthorizeInput) error {
 		return  errors.AppErr(400, "invalid redirect_uri")
 	}
 
-	_, err := o.clientRepo.GetByID(req.ClientID)
+	_, err := o.clientRepo.ClientByID(req.ClientID)
 	if err != nil {
 		return errors.AppErr(400, "invalid client_id")
 	}
@@ -53,15 +53,15 @@ func (o oauthService) NewAuthReq(input models.AuthorizeInput) (*models.AuthReque
 	if err != nil {
 		return nil, err
 	}
-	return o.authRepo.GetByID(req.ID.String())
+	return o.authRepo.AuthReqByID(req.ID.String())
 }
 
 func (o oauthService) FindAuthReq(id string) (*models.AuthRequest, error) {
-	return o.authRepo.GetByID(id)
+	return o.authRepo.AuthReqByID(id)
 }
 
 func (o oauthService) FindAuthReqByCode(code string) (*models.AuthRequest, error) {
-	return o.authRepo.GetByCode(code)
+	return o.authRepo.AuthReqByCode(code)
 }
 
 func (o oauthService) UpdateAuthReq(req *models.AuthRequest) error {

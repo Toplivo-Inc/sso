@@ -34,7 +34,7 @@ func MustBuild() *Dependencies {
 	authRepo := storage.NewAuthRepo(d.DB)
 
 	// Set up services
-	userService := service.NewUseService(userRepo, clientRepo)
+	userService := service.NewAuthService(userRepo, clientRepo)
 	oauthService := service.NewOAuthService(clientRepo, authRepo)
 	clientService := service.NewClientService(clientRepo)
 	d.sessionService = service.NewSessionService(userRepo)

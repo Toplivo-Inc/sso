@@ -20,7 +20,7 @@ type User struct {
 	LastLoginAt   *time.Time   `json:"last_login_at,omitempty"`
 	IsBlocked     bool         `json:"is_blocked" gorm:"default:false; not null"`
 	BlockedAt     *time.Time   `json:"blocked_at,omitempty"`
-	Permissions   []Permission `gorm:"many2many:permission_to_user"`
+	Scopes   []Scope `gorm:"many2many:scope_to_user"`
 	// GithubID     sql.NullInt32  `json:"github_id"`
 	// TelegramID   sql.NullInt32  `json:"google_id,omitempty"`
 }
@@ -47,7 +47,7 @@ type Client struct {
 	Description sql.NullString `json:"description"`
 }
 
-type Permission struct {
+type Scope struct {
 	gorm.Model
 	ID       uuid.UUID `json:"id" gorm:"primaryKey; type:uuid; default:gen_random_uuid()"`
 	ClientID uuid.UUID `json:"client_id" gorm:"type:uuid; foreignKey; references:clients.id; constraint:OnDelete:CASCADE"`
@@ -59,7 +59,7 @@ type Permission struct {
 	Description sql.NullString `json:"description"`
 }
 
-func (p Permission) ScopeString() string {
+func (p Scope) ScopeString() string {
 	return p.Resource + ":" + p.Action
 }
 
@@ -69,7 +69,7 @@ type AuthRequest struct {
 	ResponseType        string    `gorm:"not null"`
 	ClientID            uuid.UUID `gorm:"type:uuid; not null; foreignKey; references:clients.id; constraint:OnDelete:CASCADE"`
 	RedirectURI         string    `gorm:"not null"`
-	Scope               string    `gorm:"not null; default=openid+profile"`
+	Scopes               string    `gorm:"not null; default=openid+profile"`
 	State               string
 	Code                sql.NullString `gorm:"unique"`
 	CodeChallenge       string

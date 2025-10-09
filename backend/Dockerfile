@@ -6,7 +6,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -C /app/cmd/sso -o sso
 
 
-FROM alpine
+FROM alpine:3.22.2
 WORKDIR /root/
 COPY --from=builder /app ./app
 EXPOSE 3000

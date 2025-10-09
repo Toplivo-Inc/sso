@@ -31,7 +31,7 @@ func TestUserCRUD(t *testing.T) {
 		t.Log("CREATED USER:", spew.Sdump(init))
 	}
 
-	user, err := repo.GetUserByID(init.ID.String())
+	user, err := repo.UserByID(init.ID.String())
 	if err != nil {
 		t.Error(err)
 	} else {
