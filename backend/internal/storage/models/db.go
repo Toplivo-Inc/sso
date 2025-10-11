@@ -51,7 +51,7 @@ type Scope struct {
 	gorm.Model
 	ID       uuid.UUID `json:"id" gorm:"primaryKey; type:uuid; default:gen_random_uuid()"`
 	ClientID uuid.UUID `json:"client_id" gorm:"type:uuid; foreignKey; references:clients.id; constraint:OnDelete:CASCADE"`
-	// If permission is email:write, then email is resource and write is action
+	// If scope is email:write, then email is resource and write is action
 	Resource string `json:"resource" gorm:"not null"`
 	Action   string `json:"action" gorm:"not null"`
 	// Display name

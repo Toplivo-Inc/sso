@@ -88,5 +88,5 @@ func (s *authService) FindUserByID(id string) (*models.User, error) {
 }
 
 func (s *authService) FindUserPermissions(userID, clientID string) []models.Scope {
-	return s.userRepo.GetPermissions(userID, clientID)
+	return s.userRepo.GetScopes(userID, clientID)
 }

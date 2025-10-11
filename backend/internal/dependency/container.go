@@ -1,4 +1,4 @@
-// Package dependency defines dependency injection container with config, database and handlers
+// Package dependency defines dependency injection container with config, database and controllers
 package dependency
 
 import (
@@ -18,9 +18,8 @@ type Dependencies struct {
 
 	sessionService service.SessionService
 
-	API      handlers.APIController
-	OAuth    handlers.OAuthController
-	Frontend *handlers.FrontendController
+	API      controllers.APIController
+	OAuth    controllers.OAuthController
 }
 
 func MustBuild() *Dependencies {
@@ -39,10 +38,9 @@ func MustBuild() *Dependencies {
 	clientService := service.NewClientService(clientRepo)
 	d.sessionService = service.NewSessionService(userRepo)
 
-	// Set up handlers
-	d.API = handlers.NewAPI(userService, oauthService, d.Config)
-	d.OAuth = handlers.NewOAuth(oauthService, userService, clientService, d.Config)
-	d.Frontend = handlers.MustLoadFrontend()
+	// Set up controllers
+	d.API = controllers.NewAPI(userService, oauthService, d.Config)
+	d.OAuth = controllers.NewOAuth(oauthService, userService, clientService, d.Config)
 
 	return &d
 }

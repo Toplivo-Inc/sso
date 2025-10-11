@@ -51,7 +51,7 @@ func login(c *gin.Context) {
 	url := fmt.Sprintf(
 		"http://localhost:9100/oauth/authorize?response_type=code&state=%s&client_id=%s&redirect_uri=http://localhost:9102/callback&code_challenge_method=S256&code_challenge=%s",
 		state,
-		"6ffa873a-01d5-4879-9880-60d4025af9f3",
+		"99999999-9999-9999-9999-999999999999",
 		challenge)
 	c.Redirect(302, url)
 }

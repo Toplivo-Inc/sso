@@ -23,8 +23,8 @@ type UserRepository interface {
 	UpdateSession(session *models.Session) error
 	DeleteSession(id string) error
 
-	// permission operations
-	GetPermissions(userID, clientID string) []models.Scope
+	// scope operations
+	GetScopes(userID, clientID string) []models.Scope
 }
 
 type AuthRepository interface {
@@ -45,9 +45,9 @@ type ClientRepository interface {
 }
 
 type ScopeRepository interface {
-	Create(permission *models.Scope) error
+	Create(scope *models.Scope) error
 	ScopeByID(id string) (*models.Scope, error)
 	ClientScopes(clientID string) ([]models.Scope, error)
-	Update(permission *models.Scope) error
+	Update(scope *models.Scope) error
 	Delete(id string) error
 }

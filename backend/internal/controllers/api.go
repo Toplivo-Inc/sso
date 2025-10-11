@@ -1,6 +1,7 @@
-package handlers
+package controllers
 
 import (
+	"log"
 	"sso/internal/service"
 	"sso/internal/storage/models"
 	"sso/pkg/config"
@@ -96,6 +97,7 @@ func (a api) Login(c *gin.Context) {
 		return
 	}
 
+	log.Println("Setting session token cookie")
 	c.SetCookie("TOPLIVO_SESSION_TOKEN", sessionToken, 10000, "/", "localhost", a.config.App.Production, true)
 	c.JSON(201, gin.H{
 		"auth_request": authRequest.ID,

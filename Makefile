@@ -6,6 +6,7 @@ BACKEND := backend
 .PHONY: docs run build migration psql stop
 
 run:
+	@cd $(BACKEND) && go run ./cmd/test-service/main.go &
 	@docker compose up --attach backend
 
 build: docs
@@ -13,8 +14,8 @@ build: docs
 	@docker compose up --build --attach backend
 
 stop:
-	@docker stop toplivo-sso
-	@docker stop toplivo-frontend
+	@docker stop tsso-back
+	@docker stop tsso-front
 	@fuser -k 9102/tcp
 
 docs:

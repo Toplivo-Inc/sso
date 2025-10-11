@@ -70,13 +70,13 @@ func (r userRepo) RestoreUser(id string) error {
 }
 
 // FindByName selects a user with provided uuid
-func (r userRepo) GetPermissions(userID, clientID string) []models.Scope {
+func (r userRepo) GetScopes(userID, clientID string) []models.Scope {
 	perms := make([]models.Scope, 0)
 
 	r.db.Raw(`
 	SELECT (p.*) FROM users AS u
-		LEFT OUTER JOIN permission_to_user AS pu ON u.id = pu.user_id AND u.id = ?
-		INNER JOIN permissions AS p ON p.id = pu.permission_id AND p.client_id = ?;`, userID, clientID).
+		LEFT OUTER JOIN scope_to_user AS pu ON u.id = pu.user_id AND u.id = ?
+		INNER JOIN scopes AS p ON p.id = pu.scope_id AND p.client_id = ?;`, userID, clientID).
 		Scan(&perms)
 
 	return perms

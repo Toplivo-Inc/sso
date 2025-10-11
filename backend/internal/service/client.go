@@ -19,6 +19,6 @@ func (c *clientService) FindClientByID(id string) (*models.Client, error) {
 }
 
 func (c *clientService) Permissions(clientID string, userID string) []models.Scope {
-	permissions := make([]models.Scope, 0)
-	return permissions
+	scopes := make([]models.Scope, 0)
+	return scopes
 }

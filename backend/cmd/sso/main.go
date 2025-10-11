@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -24,7 +27,7 @@ func main() {
 	// FIXME: cors
 	router.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"http://localhost:9101", "https://localhost:9100"},
 	}))
 
 	api := router.Group("/api")
@@ -44,9 +47,22 @@ func main() {
 	}
 
 	router.Static("/assets", "static/images")
-	router.GET("/", dp.Frontend.Main)
-	router.GET("/login", dp.Frontend.Login)
-	router.GET("/register", dp.Frontend.Register)
+	router.GET("/login", func(c *gin.Context) {
+		query := ""
+		for k, v := range c.Request.URL.Query() {
+			values := strings.Join(v, "+")
+			query += k + "=" + values + "&"
+		}
+		c.Redirect(302, fmt.Sprintf("http://localhost:9101/login?%s", query))
+	})
+	router.GET("/register", func(c *gin.Context) {
+		query := ""
+		for k, v := range c.Request.URL.Query() {
+			values := strings.Join(v, "+")
+			query += k + "=" + values
+		}
+		c.Redirect(302, fmt.Sprintf("http://localhost:9101/register?%s", query))
+	})
 
 	router.Run(":8080")
 }
