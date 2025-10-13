@@ -1,6 +1,6 @@
 # ToplivoSSO
 
-> [!ДИСКЛЕЙМЕР]
+> [!WARNING]
 > Пока находится в разработке.
 
 ToplivoSSO это легковесный SSO сервис для экосистемы Toplivo™, поддерживающий OpenID Connect с authorization code flow.
