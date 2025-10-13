@@ -16,11 +16,11 @@ type User struct {
 	Email         sql.NullString `json:"email" gorm:"unique"`
 	EmailVerified bool           `json:"email_verified" gorm:"not null; default:false"`
 	PasswordHash  sql.NullString
-	AvatarURL     string       `json:"avatar_url"`
-	LastLoginAt   *time.Time   `json:"last_login_at,omitempty"`
-	IsBlocked     bool         `json:"is_blocked" gorm:"default:false; not null"`
-	BlockedAt     *time.Time   `json:"blocked_at,omitempty"`
-	Scopes   []Scope `gorm:"many2many:scope_to_user"`
+	AvatarURL     string     `json:"avatar_url"`
+	LastLoginAt   *time.Time `json:"last_login_at,omitempty"`
+	IsBlocked     bool       `json:"is_blocked" gorm:"default:false; not null"`
+	BlockedAt     *time.Time `json:"blocked_at,omitempty"`
+	Scopes        []Scope    `gorm:"many2many:scope_to_user"`
 	// GithubID     sql.NullInt32  `json:"github_id"`
 	// TelegramID   sql.NullInt32  `json:"google_id,omitempty"`
 }
@@ -63,17 +63,17 @@ func (p Scope) ScopeString() string {
 	return p.Resource + ":" + p.Action
 }
 
-type AuthRequest struct {
+type AuthCodes struct {
 	gorm.Model
-	ID                  uuid.UUID `gorm:"primaryKey; type:uuid; default:gen_random_uuid()"`
+	Code                string    `gorm:"primaryKey"`
 	ResponseType        string    `gorm:"not null"`
 	ClientID            uuid.UUID `gorm:"type:uuid; not null; foreignKey; references:clients.id; constraint:OnDelete:CASCADE"`
 	RedirectURI         string    `gorm:"not null"`
-	Scopes               string    `gorm:"not null; default=openid+profile"`
-	State               string
-	Code                sql.NullString `gorm:"unique"`
+	Scopes              string    `gorm:"not null; default=openid"`
 	CodeChallenge       string
 	CodeChallengeMethod string
-	UserID              uuid.UUID `gorm:"type:uuid; foreignKey; references:users.id; constraint:OnDelete:CASCADE"` // Set after login
+	State               string
+	UserID              uuid.UUID `gorm:"type:uuid; references:users.id; constraint:OnDelete:CASCADE"` // Set after login
 	ExpiresAt           time.Time `gorm:"not null"`
+	IsUsed              bool      `gorm:"not null; default=false"`
 }

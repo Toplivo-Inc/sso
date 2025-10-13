@@ -2,13 +2,13 @@ package middlewares
 
 import (
 	"sso/internal/service"
-	"sso/pkg/config"
+	"sso/internal/config"
 
 	"github.com/gin-gonic/gin"
 )
 
 // SessionMiddleware checks whether TOPLIVO_SESSION_TOKEN is provided and valid
-func SessionMiddleware(sessionService service.SessionService, config *config.Config) gin.HandlerFunc {
+func SessionMiddleware(sessionService service.SessionService, config config.Config) gin.HandlerFunc {
     return func(c *gin.Context) {
         sessionToken, err := c.Cookie("TOPLIVO_SESSION_TOKEN")
         if err != nil {

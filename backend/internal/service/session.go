@@ -1,15 +1,24 @@
 package service
 
 import (
-	"sso/internal/storage"
-	"sso/internal/storage/models"
+	"sso/internal/repository"
+	"sso/internal/models"
 )
 
-type sessionService struct {
-	userRepo storage.UserRepository
+type SessionService interface {
+	ValidateSession(sessionToken string) (*models.Session, error)
+
+	// Token generation
+	GenerateSessionToken() (string, error)
+	GenerateAccessToken() (string, error)
+	GenerateIDToken() (string, error)
 }
 
-func NewSessionService(ur storage.UserRepository) SessionService {
+type sessionService struct {
+	userRepo repository.UserRepository
+}
+
+func NewSessionService(ur repository.UserRepository) SessionService {
 	return &sessionService{ur}
 }
 

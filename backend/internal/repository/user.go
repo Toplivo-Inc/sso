@@ -1,10 +1,34 @@
-package storage
+// Package repository defines repositories over tables in DB
+package repository
 
 import (
-	"sso/internal/storage/models"
+	"sso/internal/models"
 
 	"gorm.io/gorm"
 )
+
+type UserRepository interface {
+	// user operations
+	CreateUser(user *models.User) error
+	UserByID(id string) (*models.User, error)
+	UserByEmail(email string) (*models.User, error)
+	UserByName(name string) (*models.User, error)
+	UpdateUser(user *models.User) error
+	DeleteUser(id string) error
+	SoftDeleteUser(id string) error
+	RestoreUser(id string) error
+
+	// session operations
+	CreateSession(session *models.Session) error
+	SessionByID(id string) (*models.Session, error)
+	SessionByToken(refreshToken string) (*models.Session, error)
+	SessionByMetadata(userAgent string, userIP string) (*models.Session, error)
+	UpdateSession(session *models.Session) error
+	DeleteSession(id string) error
+
+	// scope operations
+	GetScopes(userID, clientID string) []models.Scope
+}
 
 type userRepo struct {
 	db *gorm.DB

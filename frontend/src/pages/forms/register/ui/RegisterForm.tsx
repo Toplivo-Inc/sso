@@ -13,12 +13,22 @@ export function RegisterForm() {
         let passwordInput = (document.getElementById("passwordInput") as HTMLInputElement).value;
         const url = `http://localhost:9100/api/v1/register`;
         try {
-            const response = await fetch(url, {
+            let response: any = {
+                message: "",
+                ok: true,
+            };
+            await fetch(url, {
                 method: "POST",
                 body: JSON.stringify({ username: usernameInput, email: emailInput, password: passwordInput }),
-            });
+            })
+                .then(resp => {
+                    response.ok = resp.ok;
+                    resp.json()
+                })
+                .then(data => response.message = data);
+
             if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
+                throw new Error(response);
             }
 
             // FIXME: redirect to email verification
@@ -27,7 +37,9 @@ export function RegisterForm() {
             } else {
                 window.location.replace("http://localhost:9101/");
             }
-        } catch (error) {
+        } catch (error: unknown) {
+            const err = error as Error;
+            alert(err.message);
             console.error(error);
         }
     }

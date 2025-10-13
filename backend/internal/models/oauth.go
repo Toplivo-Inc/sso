@@ -20,13 +20,12 @@ const (
 // AuthorizeInput is parsed from query parameters in /oauth/authorize endpoint.
 type AuthorizeInput struct {
 	ResponseType        ResponseType        `form:"response_type" binding:"required"`
-	State               string              `form:"state"`
-	Scope               string              `form:"scope"`
 	ClientID            string              `form:"client_id" binding:"required"`
 	RedirectURI         string              `form:"redirect_uri" binding:"required"`
+	State               string              `form:"state"`
+	Scope               string              `form:"scope"`
 	CodeChallenge       string              `form:"code_challenge"`
 	CodeChallengeMethod CodeChallengeMethod `form:"code_challenge_method"`
-	AuthRequest         string              `form:"auth_request"`
 }
 
 // Query builds a string in form "response_type=<..>&client_id=<..>", etc.
@@ -36,6 +35,9 @@ func (i AuthorizeInput) Query() string {
 		i.ClientID,
 		i.RedirectURI,
 	)
+	if i.Scope != "" {
+		query += "&scope=" + i.Scope
+	}
 	if i.State != "" {
 		query += "&state=" + i.State
 	}
@@ -82,7 +84,6 @@ type TokenOutput struct {
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
-	RefreshToken string `json:"refresh_token,omitempty"`
 	IDToken      string `json:"id_token,omitempty"`
 	Scope        string `json:"scope,omitempty"`
 }

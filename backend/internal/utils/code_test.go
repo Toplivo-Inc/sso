@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"sso/internal/storage/models"
+	"sso/internal/models"
 	"testing"
 )
 

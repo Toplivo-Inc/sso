@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -12,7 +11,7 @@ import (
 
 	_ "sso/docs"
 	"sso/internal/dependency"
-	"sso/pkg/errors"
+	"sso/internal/errors"
 )
 
 // @title Toplivo SSO API
@@ -41,27 +40,17 @@ func main() {
 		oauth := router.Group("/oauth")
 		oauth.GET("/authorize", dp.SessionMiddleware(), dp.OAuth.Authorize)
 		oauth.POST("/token", dp.OAuth.Token)
-		oauth.GET("/userinfo", dp.OAuth.UserInfo)
+		oauth.GET("/userinfo", dp.SessionMiddleware(), dp.OAuth.UserInfo)
 		oauth.StaticFile("/jwks", "static/misc/jwks.json")
 		router.StaticFile("/.well-known/openid-configuration", "static/misc/openid-configuration")
 	}
 
 	router.Static("/assets", "static/images")
 	router.GET("/login", func(c *gin.Context) {
-		query := ""
-		for k, v := range c.Request.URL.Query() {
-			values := strings.Join(v, "+")
-			query += k + "=" + values + "&"
-		}
-		c.Redirect(302, fmt.Sprintf("http://localhost:9101/login?%s", query))
+		c.Redirect(302, fmt.Sprintf("http://localhost:9101/login?%s", c.Request.URL.RawQuery))
 	})
 	router.GET("/register", func(c *gin.Context) {
-		query := ""
-		for k, v := range c.Request.URL.Query() {
-			values := strings.Join(v, "+")
-			query += k + "=" + values
-		}
-		c.Redirect(302, fmt.Sprintf("http://localhost:9101/register?%s", query))
+		c.Redirect(302, fmt.Sprintf("http://localhost:9101/register?%s", c.Request.URL.RawQuery))
 	})
 
 	router.Run(":8080")

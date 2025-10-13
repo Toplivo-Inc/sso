@@ -7,9 +7,10 @@ import (
 	"io"
 	"net/http"
 
+	"sso/internal/config"
 	"sso/internal/utils"
-	"sso/pkg/config"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -31,6 +32,11 @@ func main() {
 	codes = make(map[string]Codes)
 
 	r := gin.New()
+
+	r.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins:     []string{"http://localhost:9101", "https://localhost:9100"},
+	}))
 	r.LoadHTMLGlob("cmd/test-service/*")
 	r.GET("/login", login)
 	r.GET("/callback", callback)

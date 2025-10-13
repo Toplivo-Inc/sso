@@ -1,10 +1,11 @@
+// Package utils is a bunch of stuff that i dont know where to put
 package utils
 
 import (
 	"fmt"
 	"time"
 
-	"sso/internal/storage/models"
+	"sso/internal/models"
 
 	"github.com/golang-jwt/jwt"
 )

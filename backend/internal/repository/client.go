@@ -1,10 +1,18 @@
-package storage
+package repository
 
 import (
-	"sso/internal/storage/models"
+	"sso/internal/models"
 
 	"gorm.io/gorm"
 )
+
+type ClientRepository interface {
+	Create(client *models.Client) error
+	ClientByID(id string) (*models.Client, error)
+	ClientByName(name string) (*models.Client, error)
+	Update(client *models.Client) error
+	Delete(id string) error
+}
 
 type clientRepo struct {
 	db *gorm.DB

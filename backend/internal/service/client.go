@@ -1,16 +1,20 @@
 package service
 
 import (
-	"sso/internal/storage"
-	"sso/internal/storage/models"
+	"sso/internal/repository"
+	"sso/internal/models"
 )
 
-
-type clientService struct{
-	clientRepo storage.ClientRepository
+type ClientService interface {
+	FindClientByID(id string) (*models.Client, error)
+	Permissions(clientID string, userID string) []models.Scope
 }
 
-func NewClientService(clientRepo storage.ClientRepository) ClientService {
+type clientService struct{
+	clientRepo repository.ClientRepository
+}
+
+func NewClientService(clientRepo repository.ClientRepository) ClientService {
 	return &clientService{clientRepo}
 }
 

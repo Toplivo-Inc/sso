@@ -4,28 +4,37 @@ import { Label } from "@/components/ui/label";
 import { Link } from "react-router";
 
 export function LoginForm() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const authRequest = urlParams.get("auth_request");
-
     async function sendForm() {
         let loginInput = (document.getElementById("loginInput") as HTMLInputElement).value;
         let passwordInput = (document.getElementById("passwordInput") as HTMLInputElement).value;
-        const url = `http://localhost:9100/api/v1/login?auth_request=${authRequest}`;
+        const url = `http://localhost:9100/api/v1/login${window.location.search}`;
         try {
-            const response = await fetch(url, {
+            let response: any = {
+                message: "",
+                ok: true,
+            };
+            await fetch(url, {
                 method: "POST",
                 body: JSON.stringify({ login: loginInput, password: passwordInput }),
-				credentials: "include",
-            });
+                credentials: "include",
+            })
+                .then(resp => {
+                    response.ok = resp.ok;
+                    resp.json()
+                })
+                .then(data => response.message = data);
+
             if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
+                throw new Error(response.message);
             }
 
             console.log(response);
-            const newURL = `http://localhost:9100/oauth/authorize${window.location.search}&auth_request=${authRequest}`;
+            const newURL = `http://localhost:9100/oauth/authorize${window.location.search}`;
             window.location.replace(newURL);
-        } catch (error: any) {
-            console.error(error.message);
+        } catch (error: unknown) {
+            const err = error as Error;
+            alert(err.message);
+            console.log(error);
         }
     }
 

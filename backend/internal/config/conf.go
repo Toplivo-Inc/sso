@@ -1,3 +1,4 @@
+// Package config is needed to load a config via MustLoad
 package config
 
 import (

@@ -1,13 +1,14 @@
-package storage_test
+package repository_test
 
 import (
 	"database/sql"
 	"testing"
 
-	"sso/internal/storage"
-	"sso/internal/storage/models"
+	"sso/internal/database"
+	"sso/internal/repository"
+	"sso/internal/models"
 	"sso/internal/utils"
-	"sso/pkg/config"
+	"sso/internal/config"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -17,8 +18,8 @@ func TestUserCRUD(t *testing.T) {
 
 	config.DB.Name = "test"
 	config.DB.Host = "localhost"
-	db := storage.MustLoad(config)
-	repo := storage.NewUserRepo(db)
+	db := database.MustLoad(config)
+	repo := repository.NewUserRepo(db)
 
 	init := models.User{
 		Username:     utils.RandomString(8),

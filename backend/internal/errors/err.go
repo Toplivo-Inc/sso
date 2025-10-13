@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,14 @@ func AppErr(code int, message string) *AppError {
 	}
 }
 
+func OauthErrRedirect(redirectURI, error, desc, state string) string {
+	url := fmt.Sprintf("%s?error=%s&error_description=%s", redirectURI, error, desc)
+	if state != "" {
+		url += "&state=" + state
+	}
+	return url
+}
+
 func ErrorHandling() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
@@ -41,12 +50,12 @@ func ErrorHandling() gin.HandlerFunc {
 					msg = "internal server error"
 				}
 				c.AbortWithStatusJSON(500, gin.H{
-					"message": msg,
+					"error": msg,
 				})
 				return
 			}
 			c.AbortWithStatusJSON(appErr.Code, gin.H{
-				"message": appErr.Message,
+				"error": appErr.Message,
 			})
 		}
 	}

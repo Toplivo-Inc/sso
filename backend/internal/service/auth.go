@@ -2,18 +2,25 @@
 package service
 
 import (
-	"sso/internal/storage"
-	"sso/internal/storage/models"
+	"sso/internal/errors"
+	"sso/internal/models"
+	"sso/internal/repository"
 	"sso/internal/utils"
-	"sso/pkg/errors"
 )
 
-type authService struct {
-	userRepo   storage.UserRepository
-	clientRepo storage.ClientRepository
+type AuthService interface {
+	Register(form *models.UserRegisterForm) error
+	Login(form *models.UserLoginForm, metadata *models.LoginMetadata) (string, error)
+	FindUserByID(id string) (*models.User, error)
+	FindUserPermissions(userID, clientID string) []models.Scope
 }
 
-func NewAuthService(userRepo storage.UserRepository, clientRepo storage.ClientRepository) AuthService {
+type authService struct {
+	userRepo   repository.UserRepository
+	clientRepo repository.ClientRepository
+}
+
+func NewAuthService(userRepo repository.UserRepository, clientRepo repository.ClientRepository) AuthService {
 	return &authService{
 		userRepo,
 		clientRepo,
@@ -65,21 +72,24 @@ func (s *authService) Login(form *models.UserLoginForm, metadata *models.LoginMe
 		return "", errors.AppErr(401, "user not found")
 	}
 
-	createSession := models.Session{
-		UserID:    user.ID,
-		UserAgent: metadata.UserAgent,
-		UserIP:    metadata.IP,
-		// TODO: maybe some other generation
-		SessionToken: utils.RandomString(32),
-	}
-	err = s.userRepo.CreateSession(&createSession)
+	session, err := s.userRepo.SessionByMetadata(metadata.UserAgent, metadata.IP)
 	if err != nil {
-		return "", err
+		createSession := models.Session{
+			UserID:       user.ID,
+			UserAgent:    metadata.UserAgent,
+			UserIP:       metadata.IP,
+			SessionToken: utils.RandomString(32),
+		}
+		err = s.userRepo.CreateSession(&createSession)
+		if err != nil {
+			return "", err
+		}
+		session, err = s.userRepo.SessionByID(createSession.ID.String())
+		if err != nil {
+			return "", err
+		}
 	}
-	session, err := s.userRepo.SessionByID(createSession.ID.String())
-	if err != nil {
-		return "", err
-	}
+
 	return session.SessionToken, nil
 }
 

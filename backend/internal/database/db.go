@@ -1,14 +1,11 @@
-// Package storage
-//
-// Defines DB operations that are available to use in handlers and services
-package storage
+package database
 
 import (
 	"fmt"
 	"time"
 
-	"sso/internal/storage/models"
-	"sso/pkg/config"
+	"sso/internal/models"
+	"sso/internal/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -45,7 +42,7 @@ func MustLoad(cfg *config.Config) *gorm.DB {
 		&models.Session{},
 		&models.Client{},
 		&models.Scope{},
-		&models.AuthRequest{},
+		&models.AuthCodes{},
 	)
 
 	return db
