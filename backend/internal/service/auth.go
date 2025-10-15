@@ -13,6 +13,7 @@ type AuthService interface {
 	Login(form *models.UserLoginForm, metadata *models.LoginMetadata) (string, error)
 	FindUserByID(id string) (*models.User, error)
 	FindUserPermissions(userID, clientID string) []models.Scope
+	DeleteSession(session *models.Session) error
 }
 
 type authService struct {
@@ -99,4 +100,8 @@ func (s *authService) FindUserByID(id string) (*models.User, error) {
 
 func (s *authService) FindUserPermissions(userID, clientID string) []models.Scope {
 	return s.userRepo.GetScopes(userID, clientID)
+}
+
+func (s *authService) DeleteSession(session *models.Session) error {
+	return s.userRepo.DeleteSession(session.ID.String())
 }

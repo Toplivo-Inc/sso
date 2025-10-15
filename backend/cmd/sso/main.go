@@ -41,6 +41,7 @@ func main() {
 		oauth.GET("/authorize", dp.SessionMiddleware(), dp.OAuth.Authorize)
 		oauth.POST("/token", dp.OAuth.Token)
 		oauth.GET("/userinfo", dp.SessionMiddleware(), dp.OAuth.UserInfo)
+		oauth.GET("/logout", dp.SessionMiddleware(), dp.OAuth.Logout)
 		oauth.StaticFile("/jwks", "static/misc/jwks.json")
 		router.StaticFile("/.well-known/openid-configuration", "static/misc/openid-configuration")
 	}

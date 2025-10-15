@@ -144,6 +144,6 @@ func (r userRepo) UpdateSession(session *models.Session) error {
 
 // DeleteSession deletes a session based on provided uuid.
 func (r userRepo) DeleteSession(id string) error {
-	result := r.db.Delete(&models.Session{}, id)
+	result := r.db.Where("id = ?", id).Unscoped().Delete(&models.Session{})
 	return result.Error
 }

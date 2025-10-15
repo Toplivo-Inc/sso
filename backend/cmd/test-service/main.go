@@ -77,9 +77,11 @@ func callback(c *gin.Context) {
 		AccessToken string `json:"access_token"`
 		TokenType   string `json:"token_type"`
 		ExpiresIn   int    `json:"expires_in"`
+		IdentityToken string `json:"identity_token"`
 	}
 	json.Unmarshal(b, &tokenResponse)
 
 	c.SetCookie("TOPLIVO_ACCESS_TOKEN", tokenResponse.AccessToken, tokenResponse.ExpiresIn, "/", "localhost", false, false)
+	c.SetCookie("TOPLIVO_IDENTITY_TOKEN", tokenResponse.IdentityToken, tokenResponse.ExpiresIn, "/", "localhost", false, false)
 	c.Redirect(302, "/")
 }

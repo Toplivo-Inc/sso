@@ -14,11 +14,12 @@ type OAuthController interface {
 	Authorize(c *gin.Context)
 	Token(c *gin.Context)
 	UserInfo(c *gin.Context)
+	Logout(c *gin.Context)
 }
 
 type oauth struct {
 	oauthService  service.OAuthService
-	userService   service.AuthService
+	authService   service.AuthService
 	clientService service.ClientService
 	config        config.Config
 }
@@ -70,7 +71,7 @@ func (o *oauth) Authorize(c *gin.Context) {
 			return
 		}
 
-		// User has no session, go to callback
+		// User has session, go to callback
 		redirectURL = input.RedirectURI + "?" + output.Query()
 	} else {
 		// User has no session, go to login page
@@ -112,35 +113,85 @@ func (o *oauth) Token(c *gin.Context) {
 	}
 
 	client, _ := o.clientService.FindClientByID(req.ClientID.String())
-	user, _ := o.userService.FindUserByID(req.UserID.String())
-	user.Scopes = o.userService.FindUserPermissions(user.ID.String(), client.ID.String())
+	user, _ := o.authService.FindUserByID(req.UserID.String())
+	user.Scopes = o.authService.FindUserPermissions(user.ID.String(), client.ID.String())
 
-	token, err := utils.NewAccessToken(client, user)
+	access, err := utils.NewAccessToken(client, user, o.config)
+	if err != nil {
+		c.Error(errors.AppErr(500, err.Error()))
+		return
+	}
+	identity, err := utils.NewIDToken(client, user, o.config)
 	if err != nil {
 		c.Error(errors.AppErr(500, err.Error()))
 		return
 	}
 
 	var output models.TokenOutput
-	output.AccessToken = token
+	output.AccessToken = access
 	output.TokenType = "bearer"
 	output.ExpiresIn = 300
-
-	// TODO: generate id token
+	output.IDToken = identity
 
 	c.Header("cache-control", "no-store")
 	c.JSON(200, output)
 }
 
-// POST /token HTTP/1.1
-// Host: server.example.com
-// Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
-// Content-Type: application/x-www-form-urlencoded
-// grant_type=authorization_code
-// &code=SplxlOBeZQQYbYS6WxSbIA
-// &code_verifier=3641a2d12d66101249cdf7a79c000c1f8c05d2aafcf14bf146497bed
+// FIXME:
+// userinfo should take bearer auth header, but swaggo/swag dun' hav nuthin' as ya se
+// and pull request from february that adds the definition is open and has 0 comments
 
 // UserInfo godoc
+//
+// @Summary get user info
+// @Description returns claims
+// @Tags OpenID
+// @Success 200
+// @Failure 401
+// @Failure 500
+// @Router /oauth/logout [get]
 func (o *oauth) UserInfo(c *gin.Context) {
 	panic("unimplemented")
+	// TODO: i should use sso's secret for signing id tokens
+	// i need bootstrapping
+	// idToken := strings.Split(c.GetHeader("Authorization"), " ")[1]
+	// err := utils.VerifyToken(nil, idToken)
+	// if err != nil {
+	// }
+}
+
+// Logout godoc
+//
+// @Summary logout from session
+// @Description deletes session from DB and revokes session token cookie
+// @Param redirect_uri query string false "URI to redirect after"
+// @Tags OpenID
+// @Success 200
+// @Success 204
+// @Success 302
+// @Failure 500
+// @Router /oauth/logout [get]
+func (o *oauth) Logout(c *gin.Context) {
+	redir := c.Query("redirect_uri")
+	s, exists := c.Get("session")
+	if !exists {
+		c.Status(200)
+		return
+	}
+
+	session := s.(*models.Session)
+	err := o.authService.DeleteSession(session)
+	if err != nil {
+		c.Error(errors.AppErr(500, err.Error()))
+		return
+	}
+
+	c.SetCookie("TOPLIVO_SESSION_TOKEN", "", -1, "/", "localhost", false, true)
+	c.SetCookie("TOPLIVO_ACCESS_TOKEN", "", -1, "/", "localhost", false, true)
+	c.SetCookie("TOPLIVO_IDENTITY_TOKEN", "", -1, "/", "localhost", false, true)
+	if redir != "" {
+		c.Redirect(302, redir)
+	} else {
+		c.Status(204)
+	}
 }
