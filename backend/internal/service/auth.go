@@ -11,20 +11,15 @@ import (
 type AuthService interface {
 	Register(form *models.UserRegisterForm) error
 	Login(form *models.UserLoginForm, metadata *models.LoginMetadata) (string, error)
-	FindUserByID(id string) (*models.User, error)
-	FindUserPermissions(userID, clientID string) []models.Scope
-	DeleteSession(session *models.Session) error
 }
 
 type authService struct {
 	userRepo   repository.UserRepository
-	clientRepo repository.ClientRepository
 }
 
-func NewAuthService(userRepo repository.UserRepository, clientRepo repository.ClientRepository) AuthService {
+func NewAuthService(userRepo repository.UserRepository) AuthService {
 	return &authService{
 		userRepo,
-		clientRepo,
 	}
 }
 
@@ -94,14 +89,3 @@ func (s *authService) Login(form *models.UserLoginForm, metadata *models.LoginMe
 	return session.SessionToken, nil
 }
 
-func (s *authService) FindUserByID(id string) (*models.User, error) {
-	return s.userRepo.UserByID(id)
-}
-
-func (s *authService) FindUserPermissions(userID, clientID string) []models.Scope {
-	return s.userRepo.GetScopes(userID, clientID)
-}
-
-func (s *authService) DeleteSession(session *models.Session) error {
-	return s.userRepo.DeleteSession(session.ID.String())
-}

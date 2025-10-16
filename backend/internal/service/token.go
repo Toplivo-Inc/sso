@@ -1,5 +1,5 @@
 // Package utils is a bunch of stuff that i dont know where to put
-package utils
+package service
 
 import (
 	"fmt"
@@ -11,8 +11,20 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
+type TokenService interface {
+	NewAccessToken(client *models.Client, user *models.User, c config.Config) (string, error)
+	NewIDToken(client *models.Client, user *models.User, c config.Config) (string, error)
+	VerifyToken(client models.Client, tokenString string) (*jwt.Token, error)
+}
+
+type tokenService struct{}
+
+func NewTokenService() TokenService {
+	return tokenService{}
+}
+
 // NewAccessToken returns a signed JWT access token that lasts 5 minutes
-func NewAccessToken(client *models.Client, user *models.User, c config.Config) (string, error) {
+func (t tokenService) NewAccessToken(client *models.Client, user *models.User, c config.Config) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["iss"] = c.App.BaseURL
@@ -24,7 +36,7 @@ func NewAccessToken(client *models.Client, user *models.User, c config.Config) (
 
 	scopes := make([]string, 0)
 	for _, perm := range user.Scopes {
-		scopes = append(scopes, perm.ScopeString())
+		scopes = append(scopes, perm.String())
 	}
 	claims["scopes"] = scopes
 
@@ -37,7 +49,7 @@ func NewAccessToken(client *models.Client, user *models.User, c config.Config) (
 }
 
 // NewIDToken returns JWT ID token that lasts 5 minutes
-func NewIDToken(client *models.Client, user *models.User, c config.Config) (string, error) {
+func (t tokenService) NewIDToken(client *models.Client, user *models.User, c config.Config) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["iss"] = c.App.BaseURL
@@ -56,7 +68,7 @@ func NewIDToken(client *models.Client, user *models.User, c config.Config) (stri
 }
 
 // VerifyToken returns an error if token is invalid or expired
-func VerifyToken(client models.Client, tokenString string) (*jwt.Token, error) {
+func (t tokenService) VerifyToken(client models.Client, tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return []byte(client.Secret), nil
 	})

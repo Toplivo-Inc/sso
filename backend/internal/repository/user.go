@@ -10,6 +10,8 @@ import (
 type UserRepository interface {
 	// user operations
 	CreateUser(user *models.User) error
+	Users() []models.User
+	UsersPaginated(limit, page int) []models.User
 	UserByID(id string) (*models.User, error)
 	UserByEmail(email string) (*models.User, error)
 	UserByName(name string) (*models.User, error)
@@ -20,6 +22,7 @@ type UserRepository interface {
 
 	// session operations
 	CreateSession(session *models.Session) error
+	Sessions(id string) []models.Session
 	SessionByID(id string) (*models.Session, error)
 	SessionByToken(refreshToken string) (*models.Session, error)
 	SessionByMetadata(userAgent string, userIP string) (*models.Session, error)
@@ -93,7 +96,7 @@ func (r userRepo) RestoreUser(id string) error {
 	return r.db.Unscoped().Model(&models.User{}).Where("id = ?", id).Update("deleted_at", nil).Error
 }
 
-// FindByName selects a user with provided uuid
+// GetScopes selects finds user scopes for provided client
 func (r userRepo) GetScopes(userID, clientID string) []models.Scope {
 	perms := make([]models.Scope, 0)
 
@@ -120,7 +123,7 @@ func (r userRepo) SessionByID(id string) (*models.Session, error) {
 	return &session, result.Error
 }
 
-// FindByID selects a session with provided refresh token
+// SessionByToken selects a session with provided refresh token
 func (r userRepo) SessionByToken(sessionToken string) (*models.Session, error) {
 	var session models.Session
 	result := r.db.Where("session_token = ?", sessionToken).First(&session)
@@ -146,4 +149,25 @@ func (r userRepo) UpdateSession(session *models.Session) error {
 func (r userRepo) DeleteSession(id string) error {
 	result := r.db.Where("id = ?", id).Unscoped().Delete(&models.Session{})
 	return result.Error
+}
+
+// Users selects all users
+func (r *userRepo) Users() []models.User {
+	users := make([]models.User, 0)
+	r.db.Find(&users)
+	return users
+}
+
+// Sessions selects all sessions
+func (r *userRepo) Sessions(id string) []models.Session {
+	sessions := make([]models.Session, 0)
+	r.db.Where("user_id = ?", id).Find(&sessions)
+	return sessions
+}
+
+// UsersPaginated selects a page of users
+func (r *userRepo) UsersPaginated(limit int, page int) []models.User {
+	users := make([]models.User, 0)
+	r.db.Limit(limit).Offset(limit * (page - 1)).Find(&users)
+	return users
 }

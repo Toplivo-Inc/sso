@@ -17,10 +17,11 @@ type Dependencies struct {
 	Config *config.Config
 	DB     *gorm.DB
 
-	sessionService service.SessionService
+	sS service.SessionService
 
-	API      controllers.APIController
-	OAuth    controllers.OAuthController
+	API   controllers.APIController
+	OAuth controllers.OAuthController
+	CRUD  controllers.CRUDController
 }
 
 func MustBuild() *Dependencies {
@@ -29,23 +30,26 @@ func MustBuild() *Dependencies {
 	d.DB = database.MustLoad(d.Config)
 
 	// Set up repos
-	userRepo := repository.NewUserRepo(d.DB)
-	clientRepo := repository.NewClientRepo(d.DB)
-	authRepo := repository.NewAuthRepo(d.DB)
+	uR := repository.NewUserRepo(d.DB)
+	cR := repository.NewClientRepo(d.DB)
+	aR := repository.NewAuthRepo(d.DB)
 
 	// Set up services
-	userService := service.NewAuthService(userRepo, clientRepo)
-	oauthService := service.NewOAuthService(clientRepo, authRepo, *d.Config)
-	clientService := service.NewClientService(clientRepo)
-	d.sessionService = service.NewSessionService(userRepo)
+	uS := service.NewUserService(uR, cR)
+	aS := service.NewAuthService(uR)
+	oaS := service.NewOAuthService(cR, aR, *d.Config)
+	tS := service.NewTokenService()
+	cS := service.NewClientService(cR)
+	d.sS = service.NewSessionService(uR)
 
 	// Set up controllers
-	d.API = controllers.NewAPI(userService, oauthService, *d.Config)
-	d.OAuth = controllers.NewOAuth(oauthService, userService, clientService, *d.Config)
+	d.API = controllers.NewAPI(aS, oaS, *d.Config)
+	d.OAuth = controllers.NewOAuth(oaS, tS, uS, cS, *d.Config)
+	d.CRUD = controllers.NewCRUD(uS, cS)
 
 	return &d
 }
 
 func (d *Dependencies) SessionMiddleware() gin.HandlerFunc {
-	return middlewares.SessionMiddleware(d.sessionService, *d.Config)
+	return middlewares.SessionMiddleware(d.sS, *d.Config)
 }

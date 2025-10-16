@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"sso/internal/models"
 	"testing"
 )
 
@@ -12,28 +11,28 @@ func TestValidateCodeChallenge(t *testing.T) {
 		// Named input parameters for target function.
 		challenge string
 		verifier  string
-		method    models.CodeChallengeMethod
+		method    CodeChallengeMethod
 		want      bool
 	}{
 		{
 			"plain",
 			"bebra",
 			"bebra",
-			models.Plain,
+			Plain,
 			true,
 		},
 		{
 			"basic",
 			"NDhiOTcyNzBlMTAxYzE2ZTJkOGNiNWJiMzA3YjhlMzllZjNlZTQwM2I2NGFiOTg3NDA1ZGI4YjExZDBkNTE2ZQ==",
 			"bebra",
-			models.S256,
+			S256,
 			true,
 		},
 		{
 			"basic",
 			"ODNjMmFmZWM0Yzg4Y2ZjMmU1ZWQyNjg2NmY2NTFkNjVhNjA3Y2MyZTkzNTZkOWJmNDQ1N2M1NjlkNjFkNDBiNQ==",
 			"bebra2",
-			models.S256,
+			S256,
 			true,
 		},
 		{

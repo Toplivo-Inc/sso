@@ -13,13 +13,13 @@ import (
 )
 
 type OAuthService interface {
-	ValidateAuthorizeInput(models.AuthorizeInput) error
-	NewAuthReq(code string, input models.AuthorizeInput, userID uuid.UUID) (*models.AuthCodes, error)
+	ValidateAuthorizeInput(models.AuthorizeQuery) error
+	NewAuthReq(code string, input models.AuthorizeQuery, userID uuid.UUID) (*models.AuthCodes, error)
 	AuthCodeByState(state string) (*models.AuthCodes, error)
 	AuthCodeByCode(id string) (*models.AuthCodes, error)
-	UpdateAuthReq(*models.AuthCodes, *models.Session, models.AuthorizeOutput) error
+	UpdateAuthReq(*models.AuthCodes, *models.Session, models.CallbackQuery) error
 
-	CallbackData(models.AuthorizeInput) models.AuthorizeOutput
+	CallbackData(models.AuthorizeQuery) models.CallbackQuery
 }
 
 type oauthService struct {
@@ -37,9 +37,9 @@ func NewOAuthService(clientRepo repository.ClientRepository, authRepo repository
 }
 
 // ValidateAuthorizeReq validates auth request and returns a client
-func (o oauthService) ValidateAuthorizeInput(req models.AuthorizeInput) error {
+func (o oauthService) ValidateAuthorizeInput(req models.AuthorizeQuery) error {
 	switch req.ResponseType {
-	case models.Code, models.Token:
+	case utils.Code, utils.Token:
 	default:
 		return errors.AppErr(400, "invalid response_type")
 	}
@@ -47,7 +47,7 @@ func (o oauthService) ValidateAuthorizeInput(req models.AuthorizeInput) error {
 		return errors.AppErr(400, "redundnant code challenge method without code challenge")
 	}
 	switch req.CodeChallengeMethod {
-	case "", models.Plain, models.S256:
+	case "", utils.Plain, utils.S256:
 	default:
 		return errors.AppErr(400, "invalid code_challenge_method")
 	}
@@ -68,7 +68,7 @@ func (o oauthService) ValidateAuthorizeInput(req models.AuthorizeInput) error {
 	return nil
 }
 
-func (o oauthService) NewAuthReq(code string, input models.AuthorizeInput, userID uuid.UUID) (*models.AuthCodes, error) {
+func (o oauthService) NewAuthReq(code string, input models.AuthorizeQuery, userID uuid.UUID) (*models.AuthCodes, error) {
 	clientID,_ := uuid.Parse(input.ClientID)
 	newCode := models.AuthCodes {
 		Code: code,
@@ -96,8 +96,8 @@ func (o oauthService) AuthCodeByCode(code string) (*models.AuthCodes, error) {
 	return o.authRepo.AuthReqByCode(code)
 }
 
-func (o oauthService) CallbackData(input models.AuthorizeInput) models.AuthorizeOutput {
-	output := models.AuthorizeOutput{
+func (o oauthService) CallbackData(input models.AuthorizeQuery) models.CallbackQuery {
+	output := models.CallbackQuery{
 		State: input.State,
 		Iss:   o.config.App.BaseURL,
 		Code:  utils.RandomString(32),
@@ -105,7 +105,7 @@ func (o oauthService) CallbackData(input models.AuthorizeInput) models.Authorize
 	return output
 }
 
-func (o oauthService) UpdateAuthReq(req *models.AuthCodes, session *models.Session, output models.AuthorizeOutput) error {
+func (o oauthService) UpdateAuthReq(req *models.AuthCodes, session *models.Session, output models.CallbackQuery) error {
 	req.Code = output.Code
 	req.UserID = session.UserID
 	return o.authRepo.Update(req)

@@ -19,13 +19,14 @@ type OAuthController interface {
 
 type oauth struct {
 	oauthService  service.OAuthService
-	authService   service.AuthService
+	tokenService  service.TokenService
+	userService   service.UserService
 	clientService service.ClientService
 	config        config.Config
 }
 
-func NewOAuth(os service.OAuthService, us service.AuthService, cs service.ClientService, cfg config.Config) OAuthController {
-	return &oauth{os, us, cs, cfg}
+func NewOAuth(os service.OAuthService, ts service.TokenService, us service.UserService, cs service.ClientService, cfg config.Config) OAuthController {
+	return &oauth{os, ts, us, cs, cfg}
 }
 
 // Authorize godoc
@@ -45,17 +46,17 @@ func NewOAuth(os service.OAuthService, us service.AuthService, cs service.Client
 // @Router /oauth/authorize [get]
 func (o *oauth) Authorize(c *gin.Context) {
 	var err error
-	input := models.AuthorizeInput{}
+	authQuery := models.AuthorizeQuery{}
 
-	if err = c.ShouldBindQuery(&input); err != nil {
+	if err = c.ShouldBindQuery(&authQuery); err != nil {
 		// FIXME: different oauth error codes
 		// https://openid.net/specs/openid-connect-core-1_0.html#AuthError
-		c.Redirect(302, errors.OauthErrRedirect(input.RedirectURI, "invalid_request", err.Error(), input.State))
+		c.Redirect(302, errors.OauthErrRedirect(authQuery.RedirectURI, "invalid_request", err.Error(), authQuery.State))
 		return
 	}
 
-	if err = o.oauthService.ValidateAuthorizeInput(input); err != nil {
-		c.Redirect(302, errors.OauthErrRedirect(input.RedirectURI, "invalid_request", err.Error(), input.State))
+	if err = o.oauthService.ValidateAuthorizeInput(authQuery); err != nil {
+		c.Redirect(302, errors.OauthErrRedirect(authQuery.RedirectURI, "invalid_request", err.Error(), authQuery.State))
 		return
 	}
 
@@ -64,18 +65,18 @@ func (o *oauth) Authorize(c *gin.Context) {
 	s, exists := c.Get("session")
 	if exists {
 		session := s.(*models.Session)
-		output := o.oauthService.CallbackData(input)
-		_, err := o.oauthService.NewAuthReq(output.Code, input, session.UserID)
+		callbackQuery := o.oauthService.CallbackData(authQuery)
+		_, err := o.oauthService.NewAuthReq(callbackQuery.Code, authQuery, session.UserID)
 		if err != nil {
-			c.Redirect(302, errors.OauthErrRedirect(input.RedirectURI, "internal_server_error", err.Error(), input.State))
+			c.Redirect(302, errors.OauthErrRedirect(authQuery.RedirectURI, "internal_server_error", err.Error(), authQuery.State))
 			return
 		}
 
 		// User has session, go to callback
-		redirectURL = input.RedirectURI + "?" + output.Query()
+		redirectURL = authQuery.RedirectURI + "?" + callbackQuery.String()
 	} else {
 		// User has no session, go to login page
-		redirectURL = "/login?" + input.Query()
+		redirectURL = "/login?" + authQuery.String()
 	}
 
 	c.Redirect(302, redirectURL)
@@ -94,47 +95,47 @@ func (o *oauth) Authorize(c *gin.Context) {
 // @Failure 400
 // @Router /oauth/token [post]
 func (o *oauth) Token(c *gin.Context) {
-	var input models.TokenInput
-	if err := c.ShouldBind(&input); err != nil {
+	var request models.TokenRequest
+	if err := c.ShouldBind(&request); err != nil {
 		c.Error(errors.AppErr(400, err.Error()))
 		return
 	}
 
-	req, err := o.oauthService.AuthCodeByCode(input.Code)
+	code, err := o.oauthService.AuthCodeByCode(request.Code)
 	if err != nil {
 		c.Error(errors.AppErr(400, err.Error()))
 		return
 	}
 
-	codeValid := utils.ValidateCodeChallenge(req.CodeChallenge, input.CodeVerifier, models.CodeChallengeMethod(req.CodeChallengeMethod))
+	codeValid := utils.ValidateCodeChallenge(code.CodeChallenge, request.CodeVerifier, utils.CodeChallengeMethod(code.CodeChallengeMethod))
 	if !codeValid {
 		c.Error(errors.AppErr(400, "invalid code verifier"))
 		return
 	}
 
-	client, _ := o.clientService.FindClientByID(req.ClientID.String())
-	user, _ := o.authService.FindUserByID(req.UserID.String())
-	user.Scopes = o.authService.FindUserPermissions(user.ID.String(), client.ID.String())
+	client, _ := o.clientService.GetClientByID(code.ClientID.String())
+	user, _ := o.userService.GetUserByID(code.UserID.String())
+	user.Scopes = o.userService.GetUserScopes(user.ID.String(), client.ID.String())
 
-	access, err := utils.NewAccessToken(client, user, o.config)
+	access, err := o.tokenService.NewAccessToken(client, user, o.config)
 	if err != nil {
 		c.Error(errors.AppErr(500, err.Error()))
 		return
 	}
-	identity, err := utils.NewIDToken(client, user, o.config)
+	identity, err := o.tokenService.NewIDToken(client, user, o.config)
 	if err != nil {
 		c.Error(errors.AppErr(500, err.Error()))
 		return
 	}
 
-	var output models.TokenOutput
-	output.AccessToken = access
-	output.TokenType = "bearer"
-	output.ExpiresIn = 300
-	output.IDToken = identity
+	var response models.TokenResponse
+	response.AccessToken = access
+	response.TokenType = "bearer"
+	response.ExpiresIn = 300
+	response.IDToken = identity
 
 	c.Header("cache-control", "no-store")
-	c.JSON(200, output)
+	c.JSON(200, response)
 }
 
 // FIXME:
@@ -180,7 +181,7 @@ func (o *oauth) Logout(c *gin.Context) {
 	}
 
 	session := s.(*models.Session)
-	err := o.authService.DeleteSession(session)
+	err := o.userService.DeleteSession(session.ID.String())
 	if err != nil {
 		c.Error(errors.AppErr(500, err.Error()))
 		return

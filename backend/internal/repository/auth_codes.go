@@ -9,7 +9,7 @@ import (
 
 type AuthRepository interface {
 	Create(req *models.AuthCodes) error
-	CreateFromInput(req *models.AuthorizeInput) (*models.AuthCodes, error)
+	CreateFromInput(req *models.AuthorizeQuery) (*models.AuthCodes, error)
 	AuthReqByState(state string) (*models.AuthCodes, error)
 	AuthReqByCode(code string) (*models.AuthCodes, error)
 	Update(req *models.AuthCodes) error
@@ -33,7 +33,7 @@ func (r authRepo) Create(req *models.AuthCodes) error {
 }
 
 // Create inserts a new auth based on provided model
-func (r authRepo) CreateFromInput(input *models.AuthorizeInput) (*models.AuthCodes, error) {
+func (r authRepo) CreateFromInput(input *models.AuthorizeQuery) (*models.AuthCodes, error) {
 	clientID, err := uuid.Parse(input.ClientID)
 	if err != nil {
 		return nil, err

@@ -1,3 +1,4 @@
+// Package utils is some misc stuff that i dont know where to put
 package utils
 
 import (
@@ -5,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"math/rand/v2"
-	"sso/internal/models"
 )
 
 var letterRunes = []rune("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -18,13 +18,13 @@ func RandomString(n int) string {
 	return string(b)
 }
 
-func ValidateCodeChallenge(challenge, verifier string, method models.CodeChallengeMethod) bool {
+func ValidateCodeChallenge(challenge, verifier string, method CodeChallengeMethod) bool {
 	// plain
 	//   code_challenge = code_verifier
 	switch method {
-	case models.Plain:
+	case Plain:
 		return challenge == verifier
-	case models.S256:
+	case S256:
 		return challenge == GenerateS256Challenge(verifier)
 	}
 	return false

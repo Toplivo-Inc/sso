@@ -12,6 +12,7 @@ import (
 	_ "sso/docs"
 	"sso/internal/dependency"
 	"sso/internal/errors"
+	m "sso/internal/middlewares"
 )
 
 // @title Toplivo SSO API
@@ -29,12 +30,32 @@ func main() {
 		AllowOrigins:     []string{"http://localhost:9101", "https://localhost:9100"},
 	}))
 
-	api := router.Group("/api")
-	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	{
+		api := router.Group("/api")
+		api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 		v1 := api.Group("/v1")
 		v1.POST("/register", dp.API.Register)
 		v1.POST("/login", dp.API.Login)
+
+		v1.GET("/users", m.Pagination(10), dp.CRUD.Users)
+		v1.GET("/users/:id", dp.CRUD.UserByID)
+		v1.GET("/users/:id/scopes/:second_id", dp.CRUD.UserScopes)
+		v1.GET("/users/:id/sessions", dp.CRUD.UserSessions)
+		v1.PUT("/users/:id", dp.CRUD.UpdateUser)
+		v1.DELETE("/users/:id", dp.CRUD.DeleteUser)
+		v1.DELETE("/sessions/:id", dp.CRUD.DeleteUserSession)
+
+		v1.POST("/clients", dp.CRUD.AddClient)
+		v1.GET("/clients", m.Pagination(10), dp.CRUD.Clients)
+		v1.GET("/clients/:id", dp.CRUD.ClientByID)
+		v1.PUT("/clients/:id", nil)
+		v1.DELETE("/clients/:id", nil)
+
+		v1.POST("/clients/:id/scopes", nil)
+		v1.GET("/clients/:id/scopes", nil)
+		v1.PUT("/clients/:id/scopes/:res/:action", nil)
+		v1.DELETE("/clients/:id/scopes/:res/:action", nil)
 	}
 	{
 		oauth := router.Group("/oauth")
