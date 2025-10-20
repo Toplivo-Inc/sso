@@ -82,6 +82,6 @@ func (a api) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("TOPLIVO_SESSION_TOKEN", sessionToken, 10000, "/", "localhost", a.config.App.Production, true)
+	c.SetCookie("TOPLIVO_SESSION_TOKEN", sessionToken, 3600 * 24 * 365, "/", "localhost", a.config.App.Production, true)
 	c.Status(201)
 }

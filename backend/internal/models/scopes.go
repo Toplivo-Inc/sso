@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+
 	"sso/internal/utils"
 
 	"github.com/google/uuid"
@@ -33,18 +34,36 @@ type ScopeResponse struct {
 	Description *string `json:"description"`
 }
 
+func (s Scope) ToResponse() ScopeResponse {
+	return ScopeResponse{
+		ID:          s.ID.String(),
+		ClientID:    s.ClientID.String(),
+		Resource:    s.Resource,
+		Action:      s.Action,
+		Name:        s.Name,
+		Description: utils.ResolveNullString(s.Description),
+	}
+}
+
 func ScopesToResponses(in []Scope) []ScopeResponse {
 	res := make([]ScopeResponse, len(in))
 
 	for i, s := range in {
-		res[i] = ScopeResponse{
-			ID:          s.ID.String(),
-			ClientID:    s.ClientID.String(),
-			Resource:    s.Resource,
-			Action:      s.Action,
-			Name:        s.Name,
-			Description: utils.ResolveNullString(s.Description),
-		}
+		res[i] = s.ToResponse()
 	}
 	return res
+}
+
+type AddScopeForm struct {
+	Resource    string  `json:"resource" binding:"required" example:"email"`
+	Action      string  `json:"action" binding:"required" example:"write"`
+	Name        string  `json:"name" binding:"required" example:"Write email"`
+	Description *string `json:"description" example:"Allows user to update their email"`
+}
+
+type UpdateScopeForm struct {
+	Resource    *string `json:"resource" example:"email"`
+	Action      *string `json:"action" example:"write"`
+	Name        *string `json:"name" example:"Write email"`
+	Description *string `json:"description" example:"Allows user to update their email"`
 }

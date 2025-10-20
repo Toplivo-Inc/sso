@@ -1,18 +1,13 @@
 package service
 
 import (
-	"sso/internal/repository"
 	"sso/internal/models"
+	"sso/internal/repository"
 )
 
 type SessionService interface {
 	ValidateSession(sessionToken string) (*models.Session, error)
 	ValidateSessionWithMetadata(sessionToken, userAgent, userIP string) (*models.Session, error)
-
-	// Token generation
-	GenerateSessionToken() (string, error)
-	GenerateAccessToken() (string, error)
-	GenerateIDToken() (string, error)
 }
 
 type sessionService struct {
@@ -35,19 +30,4 @@ func (s *sessionService) ValidateSessionWithMetadata(sessionToken, userAgent, us
 		return nil, err
 	}
 	return ses, nil
-}
-
-// GenerateAccessToken implements SessionService.
-func (s *sessionService) GenerateAccessToken() (string, error) {
-	panic("unimplemented")
-}
-
-// GenerateIDToken implements SessionService.
-func (s *sessionService) GenerateIDToken() (string, error) {
-	panic("unimplemented")
-}
-
-// GenerateSessionToken implements SessionService.
-func (s *sessionService) GenerateSessionToken() (string, error) {
-	panic("unimplemented")
 }

@@ -33,13 +33,14 @@ func MustBuild() *Dependencies {
 	uR := repository.NewUserRepo(d.DB)
 	cR := repository.NewClientRepo(d.DB)
 	aR := repository.NewAuthRepo(d.DB)
+	sR := repository.NewScopeRepo(d.DB)
 
 	// Set up services
 	uS := service.NewUserService(uR, cR)
 	aS := service.NewAuthService(uR)
 	oaS := service.NewOAuthService(cR, aR, *d.Config)
 	tS := service.NewTokenService()
-	cS := service.NewClientService(cR)
+	cS := service.NewClientService(cR, sR)
 	d.sS = service.NewSessionService(uR)
 
 	// Set up controllers

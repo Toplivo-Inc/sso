@@ -40,7 +40,7 @@ func main() {
 
 		v1.GET("/users", m.Pagination(10), dp.CRUD.Users)
 		v1.GET("/users/:id", dp.CRUD.UserByID)
-		v1.GET("/users/:id/scopes/:second_id", dp.CRUD.UserScopes)
+		v1.GET("/users/:id/scopes/:client_id", dp.CRUD.UserScopes)
 		v1.GET("/users/:id/sessions", dp.CRUD.UserSessions)
 		v1.PUT("/users/:id", dp.CRUD.UpdateUser)
 		v1.DELETE("/users/:id", dp.CRUD.DeleteUser)
@@ -49,13 +49,13 @@ func main() {
 		v1.POST("/clients", dp.CRUD.AddClient)
 		v1.GET("/clients", m.Pagination(10), dp.CRUD.Clients)
 		v1.GET("/clients/:id", dp.CRUD.ClientByID)
-		v1.PUT("/clients/:id", nil)
-		v1.DELETE("/clients/:id", nil)
+		v1.PUT("/clients/:id", dp.CRUD.UpdateClient)
+		v1.DELETE("/clients/:id", dp.CRUD.DeleteClient)
 
-		v1.POST("/clients/:id/scopes", nil)
-		v1.GET("/clients/:id/scopes", nil)
-		v1.PUT("/clients/:id/scopes/:res/:action", nil)
-		v1.DELETE("/clients/:id/scopes/:res/:action", nil)
+		v1.POST("/clients/:id/scopes", dp.CRUD.AddClientScope)
+		v1.GET("/clients/:id/scopes", dp.CRUD.ClientScopes)
+		v1.PUT("/scopes/:id", dp.CRUD.UpdateClientScope)
+		v1.DELETE("/scopes/:id", dp.CRUD.DeleteClientScope)
 	}
 	{
 		oauth := router.Group("/oauth")

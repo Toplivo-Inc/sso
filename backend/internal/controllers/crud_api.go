@@ -106,7 +106,7 @@ func (cr crud) UserScopes(c *gin.Context) {
 func (cr crud) UserSessions(c *gin.Context) {
 	id := c.Param("id")
 	sessions := cr.userService.GetUserSessions(id)
-	c.JSON(200, sessions)
+	c.JSON(200, models.SessionsToResponses(sessions))
 }
 
 // @Summary Update user
@@ -154,7 +154,7 @@ func (cr crud) DeleteUser(c *gin.Context) {
 		}
 		return
 	}
-	c.Status(201)
+	c.Status(204)
 }
 
 // @Summary Delete session
@@ -252,32 +252,138 @@ func (cr crud) ClientByID(c *gin.Context) {
 	c.JSON(200, client.ToResponse())
 }
 
-// UpdateClient implements CRUDController.
-func (crud) UpdateClient(c *gin.Context) {
-	panic("unimplemented")
+// @Summary Update client
+// @Description Updates a client
+// @Tags CRUD
+// @Param id path string true "Client id"
+// @Param form body models.UpdateClientForm true "Form"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /api/v1/clients/{id} [put]
+func (cr crud) UpdateClient(c *gin.Context) {
+	id := c.Param("id")
+	var form models.UpdateClientForm
+	if err := c.ShouldBindJSON(&form); err != nil {
+		c.Error(errors.AppErr(400, err.Error()))
+		return
+	}
+
+	newClient, err := cr.clientService.UpdateClient(id, form)
+	if err != nil {
+		c.Error(errors.AppErr(500, err.Error()))
+	}
+
+	c.JSON(200, newClient.ToResponse())
 }
 
-// DeleteClient implements CRUDController.
-func (crud) DeleteClient(c *gin.Context) {
-	panic("unimplemented")
+// @Summary Delete client
+// @Description Deletes a client
+// @Tags CRUD
+// @Param id path string true "Client id"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /api/v1/clients/{id} [delete]
+func (cr crud) DeleteClient(c *gin.Context) {
+	id := c.Param("id")
+	err := cr.clientService.DeleteClient(id)
+	if err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			c.Error(errors.AppErr(404, err.Error()))
+		default:
+			c.Error(errors.AppErr(500, err.Error()))
+		}
+		return
+	}
+	c.Status(204)
 }
 
-// ClientScopes implements CRUDController.
+// @Summary Get client scopes
+// @Description Get client scopes
+// @Tags CRUD
+// @Param id path string true "Client id"
+// @Success 200
+// @Failure 500
+// @Router /api/v1/clients/{id}/scopes [get]
 func (cr crud) ClientScopes(c *gin.Context) {
-	panic("unimplemented")
+	id := c.Param("id")
+	scopes := cr.clientService.Scopes(id)
+	c.JSON(200, scopes)
 }
 
-// AddClientScope implements CRUDController.
+// @Summary Add scope to client
+// @Tags CRUD
+// @Param id path string true "Client ID"
+// @Param form body models.AddScopeForm true "Form"
+// @Success 201
+// @Failure 500
+// @Router /api/v1/clients/{id}/scopes [post]
 func (cr crud) AddClientScope(c *gin.Context) {
-	panic("unimplemented")
+	id := c.Param("id")
+	var form models.AddScopeForm
+	if err := c.ShouldBindJSON(&form); err != nil {
+		c.Error(errors.AppErr(400, err.Error()))
+		return
+	}
+
+	err := cr.clientService.AddClientScope(id, &form)
+	if err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			c.Error(errors.AppErr(404, err.Error()))
+		default:
+			c.Error(errors.AppErr(500, err.Error()))
+		}
+		return
+	}
+
+	c.Status(201)
 }
 
-// UpdateClientScope implements CRUDController.
-func (crud) UpdateClientScope(c *gin.Context) {
-	panic("unimplemented")
+// @Summary Update client scope
+// @Tags CRUD
+// @Param id path string true "Scope ID"
+// @Param form body models.UpdateScopeForm true "Form"
+// @Success 200
+// @Failure 500
+// @Router /api/v1/scopes/{id} [put]
+func (cr crud) UpdateClientScope(c *gin.Context) {
+	id := c.Param("id")
+	var form models.UpdateScopeForm
+	if err := c.ShouldBindJSON(&form); err != nil {
+		c.Error(errors.AppErr(400, err.Error()))
+		return
+	}
+
+	newScope, err := cr.clientService.UpdateScope(id, &form)
+	if err != nil {
+		c.Error(errors.AppErr(500, err.Error()))
+	}
+
+	c.JSON(200, newScope.ToResponse())
 }
 
-// DeleteClientScope implements CRUDController.
-func (crud) DeleteClientScope(c *gin.Context) {
-	panic("unimplemented")
+// @Summary Delete scope
+// @Description Deletes a scope
+// @Tags CRUD
+// @Param id path string true "Scope id"
+// @Success 204
+// @Failure 401
+// @Failure 500
+// @Router /api/v1/scope/{id} [delete]
+func (cr crud) DeleteClientScope(c *gin.Context) {
+	id := c.Param("id")
+	err := cr.clientService.DeleteScope(id)
+	if err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			c.Error(errors.AppErr(404, err.Error()))
+		default:
+			c.Error(errors.AppErr(500, err.Error()))
+		}
+		return
+	}
+	c.Status(204)
 }

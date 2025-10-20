@@ -52,8 +52,16 @@ func ClientsToResponses(cs []Client) []ClientResponse {
 }
 
 type AddClientForm struct {
-	Name string `json:"name" example:"my-app" binding:"required"`
+	Name        string `json:"name" example:"my-app" binding:"required"`
 	HomepageURL string `json:"homepage_url" example:"http://localhost:9102" binding:"required"`
 	CallbackURL string `json:"callback_url" example:"http://localhost:9102/callback" binding:"required"`
 	Description string `json:"description" example:"This is the greatest app of all time"`
+}
+
+type UpdateClientForm struct {
+	Name        string `json:"name" example:"my-cool-app"`
+	HomepageURL string `json:"homepage_url" example:"https://coolapp.com"`
+	CallbackURL string `json:"callback_url" example:"https://coolapp.com/callback"`
+	AvatarURL   string `json:"avatar_url" example:"https://pics.com/coolapp"`
+	Description string `json:"description" example:"Coolest app eva"`
 }

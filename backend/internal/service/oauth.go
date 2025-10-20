@@ -69,17 +69,17 @@ func (o oauthService) ValidateAuthorizeInput(req models.AuthorizeQuery) error {
 }
 
 func (o oauthService) NewAuthReq(code string, input models.AuthorizeQuery, userID uuid.UUID) (*models.AuthCodes, error) {
-	clientID,_ := uuid.Parse(input.ClientID)
-	newCode := models.AuthCodes {
-		Code: code,
-		ResponseType: input.RedirectURI,
-		ClientID: clientID,
-		RedirectURI: input.RedirectURI,
-		Scopes: input.Scope,
-		CodeChallenge: input.CodeChallenge,
+	clientID, _ := uuid.Parse(input.ClientID)
+	newCode := models.AuthCodes{
+		Code:                code,
+		ResponseType:        input.RedirectURI,
+		ClientID:            clientID,
+		RedirectURI:         input.RedirectURI,
+		Scopes:              input.Scope,
+		CodeChallenge:       input.CodeChallenge,
 		CodeChallengeMethod: string(input.CodeChallengeMethod),
-		State: input.State,
-		UserID: userID,
+		State:               input.State,
+		UserID:              userID,
 	}
 	err := o.authRepo.Create(&newCode)
 	if err != nil {

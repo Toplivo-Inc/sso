@@ -2,6 +2,8 @@
 package service
 
 import (
+	"time"
+
 	"sso/internal/errors"
 	"sso/internal/models"
 	"sso/internal/repository"
@@ -14,7 +16,7 @@ type AuthService interface {
 }
 
 type authService struct {
-	userRepo   repository.UserRepository
+	userRepo repository.UserRepository
 }
 
 func NewAuthService(userRepo repository.UserRepository) AuthService {
@@ -70,11 +72,14 @@ func (s *authService) Login(form *models.UserLoginForm, metadata *models.LoginMe
 
 	session, err := s.userRepo.SessionByMetadata(metadata.UserAgent, metadata.IP)
 	if err != nil {
+		now := time.Now()
 		createSession := models.Session{
-			UserID:       user.ID,
-			UserAgent:    metadata.UserAgent,
-			UserIP:       metadata.IP,
-			SessionToken: utils.RandomString(32),
+			Token:     utils.RandomString(32),
+			CreatedAt: now,
+			ExpiresAt: now.AddDate(0, 0, 365),
+			UserID:    user.ID,
+			UserAgent: metadata.UserAgent,
+			UserIP:    metadata.IP,
 		}
 		err = s.userRepo.CreateSession(&createSession)
 		if err != nil {
@@ -86,6 +91,5 @@ func (s *authService) Login(form *models.UserLoginForm, metadata *models.LoginMe
 		}
 	}
 
-	return session.SessionToken, nil
+	return session.Token, nil
 }
-

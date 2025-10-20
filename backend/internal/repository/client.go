@@ -14,7 +14,6 @@ type ClientRepository interface {
 	ClientsPaginated(limit int, page int) []models.Client
 	Update(client *models.Client) error
 	Delete(id string) error
-
 }
 
 type clientRepo struct {

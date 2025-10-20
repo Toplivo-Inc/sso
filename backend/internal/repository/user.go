@@ -98,15 +98,15 @@ func (r userRepo) RestoreUser(id string) error {
 
 // GetScopes selects finds user scopes for provided client
 func (r userRepo) GetScopes(userID, clientID string) []models.Scope {
-	perms := make([]models.Scope, 0)
+	scopes := make([]models.Scope, 0)
 
 	r.db.Raw(`
 	SELECT (p.*) FROM users AS u
 		LEFT OUTER JOIN scope_to_user AS pu ON u.id = pu.user_id AND u.id = ?
 		INNER JOIN scopes AS p ON p.id = pu.scope_id AND p.client_id = ?;`, userID, clientID).
-		Scan(&perms)
+		Scan(&scopes)
 
-	return perms
+	return scopes
 }
 
 // CreateSession inserts a new session based on provided model
@@ -126,7 +126,7 @@ func (r userRepo) SessionByID(id string) (*models.Session, error) {
 // SessionByToken selects a session with provided refresh token
 func (r userRepo) SessionByToken(sessionToken string) (*models.Session, error) {
 	var session models.Session
-	result := r.db.Where("session_token = ?", sessionToken).First(&session)
+	result := r.db.Where("token = ?", sessionToken).First(&session)
 
 	return &session, result.Error
 }
